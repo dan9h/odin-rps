@@ -1,38 +1,138 @@
 const CHOICES = ["rock", "paper", "scissors"];
+const RACETO = 5;
 
-function getPlayerChoice() {
-  try {
-    let playerChoice = prompt(
-      `Enter rock, paper or scissors. Or exit to quit.`
+const buttons = document.getElementsByClassName("rps__button");
+const roundCounterEl = document.getElementById("js-round-counter");
+const playerScoreEl = document.getElementById("js-player-score");
+const compScoreEl = document.getElementById("js-computer-score");
+const resultEl = document.getElementById("js-result");
+
+let playerScore = 0;
+let computerScore = 0;
+let roundCount = 1;
+let gameOver = false;
+let winner = null;
+
+initGame();
+
+function initGame() {
+  for (const button of buttons) {
+    button.choice = button.dataset.choice;
+    button.addEventListener("click", handleButtonClick);
+  }
+
+  updateScoreBoard();
+  displayResult("Pick a hand to start the game.");
+}
+
+function resetGame() {
+  playerScore = 0;
+  computerScore = 0;
+  roundCount = 1;
+
+  gameOver = false;
+  winner = null;
+
+  updateScoreBoard();
+  displayResult("Pick a hand to start the game.");
+}
+
+function handleButtonClick() {
+  if (gameOver) return;
+
+  const playerChoice = this.choice;
+  const computerChoice = getComputerChoice();
+
+  const roundResult = playRound(playerChoice, computerChoice);
+
+  updateScoreBoard();
+  checkWinner();
+
+  if (gameOver) {
+    displayResult(
+      `${winner === "player" ? "You Won!" : "You Lost!"} Play again?`
     );
+    showRestartPrompt();
+  } else {
+    displayResult(roundResult);
+  }
+}
 
-    while (![...CHOICES, "exit"].includes(playerChoice.toLowerCase())) {
-      playerChoice = prompt(
-        `Invalid choice. Enter rock, paper or scissors. Or exit to quit.`
-      );
+function showRestartPrompt() {
+  const btnYes = document.createElement("button");
+  const btnNo = document.createElement("button");
+
+  btnYes.textContent = "Yes";
+  btnNo.textContent = "No";
+
+  btnYes.addEventListener("click", function () {
+    resetGame();
+    showGameButtons();
+  });
+
+  btnNo.addEventListener("click", function () {
+    displayResult("Thanks for playing! Just reload the page to play again.");
+    removePromptButtons();
+  });
+
+  hideGameButtons();
+
+  function hideGameButtons() {
+    const buttonsParentEl = buttons[0].parentElement;
+
+    for (const button of buttons) {
+      button.style.display = "none";
     }
 
-    return playerChoice.toLowerCase();
-  } catch (_) {
-    // hitting cancel yields a TypeError,
-    // so instead of showing it,
-    // return "exit" to quit the game
-    return "exit";
+    buttonsParentEl.appendChild(btnYes);
+    buttonsParentEl.appendChild(btnNo);
   }
+
+  function showGameButtons() {
+    for (const button of buttons) {
+      button.style.display = "inline-block";
+    }
+
+    removePromptButtons();
+  }
+
+  function removePromptButtons() {
+    btnYes.remove();
+    btnNo.remove();
+  }
+}
+
+function checkWinner() {
+  if (playerScore === RACETO) {
+    gameOver = true;
+    winner = "player";
+    return;
+  }
+
+  if (computerScore === RACETO) {
+    gameOver = true;
+    winner = "computer";
+    return;
+  }
+}
+
+function updateScoreBoard() {
+  roundCounterEl.textContent = roundCount;
+  playerScoreEl.textContent = playerScore;
+  compScoreEl.textContent = computerScore;
+}
+
+function displayResult(message) {
+  resultEl.textContent = message;
 }
 
 function getComputerChoice() {
   return CHOICES[Math.floor(Math.random() * CHOICES.length)];
 }
 
-function capitalize(word) {
-  if (!word || typeof word !== "string") {
-    return "";
-  }
-  return word[0].toUpperCase() + word.slice(1).toLowerCase();
-}
-
 function playRound(playerChoice, computerChoice) {
+  roundCount++;
+
   if (playerChoice === computerChoice) {
     return `It's a tie! Computer also chose ${capitalize(computerChoice)}.`;
   } else {
@@ -47,32 +147,21 @@ function playRound(playerChoice, computerChoice) {
       (playerChoice === scissors && computerChoice === paper)
     ) {
       // player won
-      return `You Won! ${capitalize(playerChoice)} beats ${capitalize(
-        computerChoice
-      )}.`;
+      playerScore++;
+
+      return `${capitalize(playerChoice)} beats ${capitalize(computerChoice)}.`;
     } else {
       // computer won
-      return `You Lose! ${capitalize(computerChoice)} beats ${capitalize(
-        playerChoice
-      )}.`;
+      computerScore++;
+
+      return `${capitalize(computerChoice)} beats ${capitalize(playerChoice)}.`;
     }
   }
 }
 
-function game() {
-  for (let i = 0; i < 5; i++) {
-    const playerChoice = getPlayerChoice();
-    const computerChoice = getComputerChoice();
-
-    // if the user entered "exit" or hit the cancel button, exit the loop
-    if (playerChoice === "exit") {
-      console.log(`Thanks for playing!`);
-      break;
-    }
-
-    const result = playRound(playerChoice, computerChoice);
-    console.log(result);
+function capitalize(word) {
+  if (!word || typeof word !== "string") {
+    return "";
   }
+  return word[0].toUpperCase() + word.slice(1).toLowerCase();
 }
-
-game();

@@ -6,5 +6,23 @@
     <title>The Odin Project: Rock Paper Scissors</title>
     <script src="./rps.js" defer></script>
   </head>
-  <body></body>
+  <body>
+    <main class="rps">
+      <div class="rps__score-board">
+        <div class="rps__round-counter">
+          Round <span id="js-round-counter"></span>
+        </div>
+        <div class="rps__score">You: <span id="js-player-score"></span></div>
+        <div class="rps__score">
+          Computer: <span id="js-computer-score"></span>
+        </div>
+      </div>
+      <div class="rps__result" id="js-result"></div>
+      <div class="rps__buttons">
+        <button class="rps__button" data-choice="rock">rock</button>
+        <button class="rps__button" data-choice="paper">paper</button>
+        <button class="rps__button" data-choice="scissors">scissors</button>
+      </div>
+    </main>
+  </body>
 </html>
