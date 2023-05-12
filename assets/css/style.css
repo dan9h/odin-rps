@@ -76,7 +76,8 @@ body {
 
 .rps__result {
   text-align: center;
-  margin: 2em 0;
+  margin-bottom: 1em;
+  height: 3em;
 }
 
 .rps__buttons {
