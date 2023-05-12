@@ -1,11 +1,14 @@
+const playerScoreEl = document.getElementById("js-player-score");
+const computerScoreEl = document.getElementById("js-computer-score");
+const raceToEl = document.getElementById("js-raceto");
+const roundCounterEl = document.getElementById("js-round");
+const playerHandEl = document.getElementById("js-player-hand");
+const computerHandEl = document.getElementById("js-computer-hand");
+const resultEl = document.getElementById("js-result");
+const buttons = document.getElementsByClassName("rps__button");
+
 const CHOICES = ["rock", "paper", "scissors"];
 const RACETO = 5;
-
-const buttons = document.getElementsByClassName("rps__button");
-const roundCounterEl = document.getElementById("js-round-counter");
-const playerScoreEl = document.getElementById("js-player-score");
-const compScoreEl = document.getElementById("js-computer-score");
-const resultEl = document.getElementById("js-result");
 
 let playerScore = 0;
 let computerScore = 0;
@@ -13,9 +16,7 @@ let roundCount = 1;
 let gameOver = false;
 let winner = null;
 
-initGame();
-
-function initGame() {
+(function initGame() {
   for (const button of buttons) {
     button.choice = button.dataset.choice;
     button.addEventListener("click", handleButtonClick);
@@ -23,7 +24,7 @@ function initGame() {
 
   updateScoreBoard();
   displayResult("Pick a hand to start the game.");
-}
+})();
 
 function resetGame() {
   playerScore = 0;
@@ -33,6 +34,7 @@ function resetGame() {
   gameOver = false;
   winner = null;
 
+  updateHands("rock", "rock");
   updateScoreBoard();
   displayResult("Pick a hand to start the game.");
 }
@@ -43,6 +45,8 @@ function handleButtonClick() {
   const playerChoice = this.choice;
   const computerChoice = getComputerChoice();
 
+  updateHands(playerChoice, computerChoice);
+
   const roundResult = playRound(playerChoice, computerChoice);
 
   updateScoreBoard();
@@ -50,7 +54,7 @@ function handleButtonClick() {
 
   if (gameOver) {
     displayResult(
-      `${winner === "player" ? "You Won!" : "You Lost!"} Play again?`
+      `${winner === "player" ? "YOU WON!" : "You lost!"} Play again?`
     );
     showRestartPrompt();
   } else {
@@ -58,21 +62,23 @@ function handleButtonClick() {
   }
 }
 
+function updateHands(playerHand, computerHand) {
+  playerHandEl.src = `./assets/images/icon-${playerHand}.svg`;
+  playerHandEl.setAttribute("class", `rps__hand--${playerHand}`);
+
+  computerHandEl.src = `./assets/images/icon-${computerHand}.svg`;
+  computerHandEl.setAttribute("class", `rps__hand--${computerHand}`);
+}
+
 function showRestartPrompt() {
-  const btnYes = document.createElement("button");
-  const btnNo = document.createElement("button");
+  const restartButton = document.createElement("button");
 
-  btnYes.textContent = "Yes";
-  btnNo.textContent = "No";
+  restartButton.textContent = "Yes";
+  restartButton.setAttribute("class", "rps__button rps__button--restart");
 
-  btnYes.addEventListener("click", function () {
+  restartButton.addEventListener("click", function () {
     resetGame();
     showGameButtons();
-  });
-
-  btnNo.addEventListener("click", function () {
-    displayResult("Thanks for playing! Just reload the page to play again.");
-    removePromptButtons();
   });
 
   hideGameButtons();
@@ -84,8 +90,7 @@ function showRestartPrompt() {
       button.style.display = "none";
     }
 
-    buttonsParentEl.appendChild(btnYes);
-    buttonsParentEl.appendChild(btnNo);
+    buttonsParentEl.appendChild(restartButton);
   }
 
   function showGameButtons() {
@@ -93,12 +98,7 @@ function showRestartPrompt() {
       button.style.display = "inline-block";
     }
 
-    removePromptButtons();
-  }
-
-  function removePromptButtons() {
-    btnYes.remove();
-    btnNo.remove();
+    restartButton.remove();
   }
 }
 
@@ -117,9 +117,10 @@ function checkWinner() {
 }
 
 function updateScoreBoard() {
+  raceToEl.textContent = RACETO;
   roundCounterEl.textContent = roundCount;
   playerScoreEl.textContent = playerScore;
-  compScoreEl.textContent = computerScore;
+  computerScoreEl.textContent = computerScore;
 }
 
 function displayResult(message) {
@@ -149,12 +150,19 @@ function playRound(playerChoice, computerChoice) {
       // player won
       playerScore++;
 
-      return `${capitalize(playerChoice)} beats ${capitalize(computerChoice)}.`;
+      let PREFIXES = ["Good", "Nice", "Awesome"];
+      let PREFIX = PREFIXES[~~(Math.random() * PREFIXES.length)];
+
+      return `${PREFIX}! ${capitalize(playerChoice)} beats ${capitalize(
+        computerChoice
+      )}.`;
     } else {
       // computer won
       computerScore++;
 
-      return `${capitalize(computerChoice)} beats ${capitalize(playerChoice)}.`;
+      return `Uh-oh! ${capitalize(computerChoice)} beats ${capitalize(
+        playerChoice
+      )}.`;
     }
   }
 }
